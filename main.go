@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
@@ -88,9 +89,18 @@ func main() {
 	v1Router.Get("/healthz", handlerReadiness)
 
 	router.Mount("/v1", v1Router)
+	// srv := &http.Server{
+	// 	Addr:    ":" + port,
+	// 	Handler: router,
+	// }
+
 	srv := &http.Server{
-		Addr:    ":" + port,
-		Handler: router,
+		Addr:              ":" + port,
+		Handler:           router,
+		ReadTimeout:       5 * time.Second,   // Limit reading the entire request
+		WriteTimeout:      10 * time.Second,  // Limit the time for response writing
+		IdleTimeout:       120 * time.Second, // Max idle time for keep-alive connections
+		ReadHeaderTimeout: 2 * time.Second,   // Limit the time to read headers
 	}
 
 	log.Printf("Serving on port: %s\n", port)
